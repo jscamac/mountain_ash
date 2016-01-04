@@ -1,0 +1,123 @@
+packages:
+  - plyr
+  - dplyr
+  - tidyr
+  - rstan
+  - ggplot2
+  - grid
+  - gridExtra
+  - reshape2
+
+sources:
+  - 'R/functions.R'
+  - 'R/models.R'
+  - 'R/figures.R'
+
+plot_options:
+  A4_landscape:
+    width: 11.69
+    height: 8.27
+  
+  A4_portrait:
+    width: 8.27
+    height: 11.69
+  
+  med_square:
+    width: 6
+    height: 6
+  
+  med_rectangle:
+    width: 6
+    height: 4
+    
+  large_rectangle:
+    width: 8
+    height: 6
+    
+    
+targets:
+  all:
+    depends:
+      - export_model_fits
+      - figures
+  
+  export_model_fits:
+    depends:
+      - models/density_model.rds
+      - models/seedling_growth_model.rds
+      - models/sapling_growth_model.rds
+
+  figures:
+    depends:
+      - figures/density_coefficient_plot.pdf
+      - figures/density_predictions.pdf
+      - figures/density_stds.pdf
+      - figures/obs_ht_growth.pdf
+      - figures/growth_coefficient_plot.pdf
+      - figures/growth_stds.pdf
+  #------------- Clean data --------------------------- 
+  
+  processed_pcq_data:
+    command: process_pcq_data("data/ash_pcq.csv")
+    cleanup_level: purge
+    check: exists
+
+  processed_growth_data:
+    command: process_growth_data("data/ash_growth.csv")
+    cleanup_level: purge
+    check: exists
+    
+  #------------- Run stan models ---------------------------
+
+  density_model:
+    command: run_density_model(processed_pcq_data,I(221))
+    cleanup_level: purge
+    
+  seedling_growth_model:
+    command: run_growth_model(processed_growth_data,I(FALSE), I(1), I(130))
+    cleanup_level: purge
+    
+  sapling_growth_model:
+    command: run_growth_model(processed_growth_data,I(TRUE), I(30), I(130))
+    cleanup_level: purge
+
+  #------------- Export stan models ---------------------------
+  
+  models/density_model.rds:
+    command: saveRDS(density_model, target_name)
+    cleanup_level: purge
+    
+  models/seedling_growth_model.rds:
+    command: saveRDS(seedling_growth_model, target_name)
+    cleanup_level: purge
+    
+  models/sapling_growth_model.rds:
+    command: saveRDS(sapling_growth_model, target_name)
+    cleanup_level: purge
+
+  #------------- make figures ---------------------------
+
+  figures/density_coefficient_plot.pdf:
+    command: coefficient_plot(density_model, I(c("mu_log_site","log_b_boundary_position")), I(c("Mean intercept","Position")), I("Estimated log coefficient"))
+    plot: med_square
+    
+  figures/density_stds.pdf:
+    command: coefficient_plot(density_model, I(c("sigma_log_site","sigma_log_transect","sigma_log_point","sigma_log_obs")), I(c("Site","Transect","Point","Observation")), I("Estimated residual std"))
+    plot: med_square
+
+  figures/density_predictions.pdf:
+    command: density_multipanel(density_model)
+    plot: A4_landscape
+
+  figures/obs_ht_growth.pdf:
+    command: plot_ht_obs(processed_growth_data)
+    plot: A4_landscape
+
+  figures/growth_coefficient_plot.pdf:
+    command: multi_panel_growth_coefficients(seedling_growth_model, sapling_growth_model, I("alpha"), I(c("50m below","Timberline","100m above")), I("Mean estimated logistic growth parameter (R)"))
+    plot: A4_landscape
+
+  figures/growth_stds.pdf:
+    command: multi_panel_growth_coefficients(seedling_growth_model,sapling_growth_model, I(c("sigma_transect","sigma_ind","sigma_obs")), I(c("Transect","Individual","Observation")), I("Estimated residual std"))
+    plot: A4_landscape
+
