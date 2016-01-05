@@ -2,6 +2,8 @@
 
 *By John W. Morgan, James Vincent & James S. Camac*
 
+*Respository maintained by J S Camac*
+
 ###Overview
 
 **Question**: How species respond to climate change at local scales will depend on how edaphic and biological characteristics interact with species physiological limits and traits such as dispersal. Obligate-seeders, those species that depend on fire for recruitment, have few and episodic opportunities to track a changing climate envelope.  In such cases, long-distance seed dispersal will be necessary to take advantage of rare recruitment opportunities. We examine recruitment patterns and seedling growth below, at and above the timberline of an obligate-seeding Australian montane forest tree (Eucalyptus delegatensis) after stand-replacing fire, and place these changes in the context of regional warming.
