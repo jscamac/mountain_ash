@@ -9,7 +9,7 @@ packages:
   - reshape2
 
 sources:
-  - 'R/functions.R'
+  - 'R/data_processing.R'
   - 'R/models.R'
   - 'R/figures.R'
 
@@ -39,8 +39,14 @@ targets:
   all:
     depends:
       - export_model_fits
+      - export_processed_data
       - figures
-  
+
+  export_processed_data:
+    depends:
+      - processed_data/processed_pcq_data.rds
+      - processed_data/processed_growth_data.rds
+
   export_model_fits:
     depends:
       - models/density_model.rds
@@ -67,6 +73,14 @@ targets:
     cleanup_level: purge
     check: exists
     
+  #------------- Export processed data ---------------------
+  processed_data/processed_pcq_data.rds:
+    command: saveRDS(processed_pcq_data, target_name)
+    cleanup_level: purge
+    
+  processed_data/processed_growth_data.rds:
+    command: saveRDS(processed_growth_data, target_name)
+    cleanup_level: purge
   #------------- Run stan models ---------------------------
 
   density_model:
