@@ -1,0 +1,8 @@
+.Rproj.user
+*.Rproj
+.Rhistory
+.remake
+*.pdf
+figures
+processed_data
+models
